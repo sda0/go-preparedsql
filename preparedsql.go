@@ -1,7 +1,10 @@
 // Package preparedSQL handles statements preparing
 package preparedsql
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 var queryRegistry = map[string]string{}
 
@@ -24,9 +27,9 @@ func New(db *sql.DB) (*Registry, error) {
 	return registry, nil
 }
 
-func (m *Registry) Prepare(db *sql.DB) (err error) {
+func (r *Registry) Prepare(db *sql.DB) (err error) {
 	for name, query := range queryRegistry {
-		m.storage[name], err = db.Prepare(query)
+		r.storage[name], err = db.Prepare(query)
 		if err != nil {
 			return err
 		}
@@ -34,6 +37,12 @@ func (m *Registry) Prepare(db *sql.DB) (err error) {
 	return nil
 }
 
-func (m *Registry) Get(query string) *sql.Stmt {
-	return m.storage[query]
+func (r *Registry) Get(query string) (*sql.Stmt, error) {
+	if r.storage[query] == nil {
+		if queryRegistry[query] == "" {
+			return nil, fmt.Errorf("prepared query '%s' is not added", query)
+		}
+		return nil, fmt.Errorf("query '%s' is not prepared", query)
+	}
+	return r.storage[query], nil
 }
