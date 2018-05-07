@@ -35,7 +35,7 @@ func (r *Registry) Prepare(db *sql.DB) (err error) {
 	for name, query := range queryRegistry {
 		r.storage[name], err = db.Prepare(query)
 		if err != nil {
-			return errors.Wrapf(err, "Cannot prepare query: %s\n", name)
+			return errors.Wrapf(err, "cannot prepare query %q", name)
 		}
 	}
 	return nil
